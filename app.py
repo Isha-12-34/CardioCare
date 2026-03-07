@@ -616,4 +616,3 @@ if __name__ == "__main__":
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
     app.run(debug=True, threaded=True)  # threaded=True allows concurrent requests
 
-app = Flask(__name__)
