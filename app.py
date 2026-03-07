@@ -7,7 +7,7 @@ import smtplib
 import ssl
 import os
 # Database functions
-from CardioCareDB.db import (
+from CardioCare.db import (
     create_tables,
     insert_user,
     get_user_by_email,
