@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block title %}History | CardioCare{% endblock %}
+
+{% block extra_head %}
+<style>
+    .history-card {
+        max-width: 1100px;
+        margin: 10px auto 0;
+        background: #ffffff;
+        border-radius: 22px;
+        box-shadow: 0 18px 50px rgba(248, 113, 113, 0.25);
+        border: 3px solid #744f4f;
+        overflow: hidden;
+    }
+    .history-header {
+        padding: 24px 26px 18px;
+        background: linear-gradient(135deg, #fb7185, #e11d48);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+    .history-header h2 {
+        font-size: 20px;
+        margin: 0;
+    }
+    .history-header span {
+        font-size: 12px;
+        opacity: 0.9;
+    }
+    .history-header-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 18px;
+        background: rgba(248, 250, 252, 0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+    }
+    .history-body {
+        padding: 22px 24px 26px;
+    }
+    .chart-wrapper {
+        margin-top: 10px;
+        margin-bottom: 12px;
+        background: #fff1f2;
+        border-radius: 18px;
+        padding: 14px 16px 18px;
+        border: 1px solid #fee2e2;
+    }
+    .chart-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: #b91c1c;
+        margin-bottom: 6px;
+    }
+    .table-container {
+        overflow-x: auto;
+        margin-top: 10px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #ffffff;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(248, 113, 113, 0.15);
+    }
+    thead {
+        background: linear-gradient(135deg, #fecaca, #fb7185);
+        color: #7f1d1d;
+    }
+    th {
+        padding: 12px 10px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+    td {
+        padding: 11px 10px;
+        border-bottom: 1px solid #fee2e2;
+        font-size: 13px;
+        color: #374151;
+    }
+    tr:hover {
+        background: #fff1f2;
+    }
+    .risk-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+    .risk-badge.low {
+        background: #dcfce7;
+        color: #166534;
+    }
+    .risk-badge.moderate {
+        background: #fef3c7;
+        color: #92400e;
+    }
+    .risk-badge.high {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+    .score {
+        font-weight: 600;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 50px 20px 30px;
+        color: #6b7280;
+    }
+    .empty-state i {
+        font-size: 48px;
+        margin-bottom: 10px;
+        color: #fecaca;
+    }
+    .empty-state h3 {
+        font-size: 20px;
+        margin-bottom: 6px;
+        color: #b91c1c;
+    }
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #fb7185, #e11d48);
+        color: #ffffff;
+        font-size: 13px;
+        font-weight: 600;
+        margin-top: 14px;
+        box-shadow: 0 10px 24px rgba(248, 113, 113, 0.45);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-title">Prediction History</div>
+<div class="page-subtitle">Review how your heart disease risk has changed over time.</div>
+
+<div class="history-card">
+    <div class="history-header">
+        <div>
+            <h2>Your Prediction History</h2>
+            <span>Each entry represents a previous prediction you made with CardioCare.</span>
+        </div>
+        <div class="history-header-icon">
+            <i class="fas fa-history"></i>
+        </div>
+    </div>
+    <div class="history-body">
+        {% if records %}
+            <div class="chart-wrapper">
+                <div class="chart-title">
+                    <i class="fas fa-chart-bar"></i> Risk scores over time
+                </div>
+                <canvas id="historyChart" height="120"></canvas>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                    <tr>
+                        <th><i class="fas fa-calendar"></i> Date</th>
+                        <th><i class="fas fa-exclamation-triangle"></i> Risk Level</th>
+                        <th><i class="fas fa-percentage"></i> Risk Score</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for r in records %}
+                        <tr>
+                            <td>{{ r['prediction_date'] }}</td>
+                            <td>
+                                <span class="risk-badge {% if r['risk_level'] == 'Low' %}low{% elif r['risk_level'] == 'Moderate' %}moderate{% else %}high{% endif %}">
+                                    <i class="fas fa-{% if r['risk_level'] == 'Low' %}check-circle{% elif r['risk_level'] == 'Moderate' %}exclamation-circle{% else %}triangle-exclamation{% endif %}"></i>
+                                    {{ r['risk_level'] }}
+                                </span>
+                            </td>
+                            <td class="score">
+                                {{ r['risk_score'] }}%
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <a href="{{ url_for('dashboard') }}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <h3>No prediction history yet</h3>
+                <p>Start by creating your first prediction to see your risk trend here.</p>
+                <a href="{{ url_for('predict') }}" class="back-link">
+                    <i class="fas fa-heartbeat"></i> Make Your First Prediction
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const hLabels = {{ history_labels|tojson }};
+    const hScores = {{ history_scores|tojson }};
+
+    if (hLabels.length > 0) {
+        const hCtx = document.getElementById('historyChart').getContext('2d');
+        new Chart(hCtx, {
+            type: 'bar',
+            data: {
+                labels: hLabels,
+                datasets: [{
+                    label: 'Risk Score (%)',
+                    data: hScores,
+                    backgroundColor: 'rgba(248, 113, 113, 0.6)',
+                    borderColor: 'rgba(225, 29, 72, 1)',
+                    borderWidth: 1,
+                    borderRadius: 6,
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: { color: '#6b7280' },
+                        grid: { color: '#fee2e2' }
+                    },
+                    x: {
+                        ticks: { color: '#6b7280' },
+                        grid: { display: false }
+                    }
+                },
+                plugins: {
+                    legend: { labels: { color: '#6b7280' } }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}
+

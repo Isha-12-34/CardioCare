@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+
+{% block title %}Register | CardioCare{% endblock %}
+
+{% block extra_head %}
+<style>
+    .auth-card {
+        max-width: 1040px;
+        margin: 40px auto;
+        background: #ffffff;
+        border-radius: 24px;
+        box-shadow: 0 18px 50px rgba(248, 113, 113, 0.25);
+        border: 1px solid #fee2e2;
+        overflow: hidden;
+    }
+    .auth-layout {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .auth-left,
+    .auth-right {
+        flex: 1 1 340px;
+        padding: 0;
+    }
+    .auth-left {
+        display: flex;
+        align-items: stretch;
+    }
+    .auth-image {
+        width: 100%;
+        border-radius: 18px;
+        object-fit: cover;
+    }
+    .auth-right {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 28px 32px;
+    }
+    .auth-brand-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 22px;
+        background: linear-gradient(135deg, #fb7185, #e11d48);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        font-size: 30px;
+        box-shadow: 0 18px 40px rgba(248, 113, 113, 0.6);
+        margin: 0 auto 6px;
+    }
+    .auth-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #881337;
+        text-align: center;
+        margin-top: 6px;
+        margin-bottom: 18px;
+    }
+    .auth-body {
+        padding: 0;
+    }
+    .flash-message {
+        padding: 10px 12px;
+        border-radius: 10px;
+        margin-bottom: 8px;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #fee2e2;
+        color: #b91c1c;
+        border-left: 3px solid #e11d48;
+    }
+    .form-group {
+        margin-bottom: 16px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 13px;
+        color: #374151;
+        font-weight: 500;
+    }
+    .input-wrapper {
+        position: relative;
+    }
+    .input-wrapper i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9ca3af;
+        font-size: 13px;
+    }
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 10px 12px 10px 34px;
+        border-radius: 10px;
+        border: 1px solid #fecaca;
+        font-size: 13px;
+        outline: none;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+        border-color: #fb7185;
+        box-shadow: 0 0 0 1px #fb7185;
+    }
+    .error-message {
+        color: #e11d48;
+        font-size: 11px;
+        margin-top: 4px;
+        display: none;
+    }
+    .password-strength {
+        margin-top: 4px;
+        font-size: 11px;
+        color: #6b7280;
+    }
+    .btn-primary {
+        width: 100%;
+        padding: 11px 16px;
+        border-radius: 999px;
+        border: none;
+        background: linear-gradient(135deg, #fb7185, #e11d48);
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        box-shadow: 0 12px 28px rgba(248, 113, 113, 0.45);
+        margin-top: 6px;
+    }
+    .btn-primary:hover {
+        transform: translateY(-1px);
+    }
+    .auth-footer {
+        margin-top: 16px;
+        font-size: 12px;
+        text-align: center;
+        color: #6b7280;
+    }
+    .auth-footer a {
+        color: #e11d48;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+    <div class="auth-layout">
+        <div class="auth-left">
+            <img src="{{ url_for('static', filename='login.jpg') }}"
+                 alt="CardioCare registration illustration"
+                 class="auth-image">
+        </div>
+        <div class="auth-right">
+            <div class="auth-body">
+                <div class="auth-brand-icon">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <div class="auth-title">Create your CardioCare account</div>
+                <div class="flash-messages" style="margin-top: 6px;">
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="flash-message">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                </div>
+
+                <form method="POST" id="registerForm" novalidate>
+                    <div class="form-group">
+                        <label><i class="fas fa-user"></i> Full Name</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-user"></i>
+                            <input type="text" name="name" placeholder="Enter your full name" required
+                                   pattern="[a-zA-Z\s]{2,}" minlength="2">
+                        </div>
+                        <span class="error-message">Name must be at least 2 characters and contain only letters.</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-envelope"></i> Email Address</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" name="email" placeholder="yourname@gmail.com" required
+                                   pattern="[a-zA-Z0-9._+-]+@gmail\.com$">
+                        </div>
+                        <span class="error-message">Only Gmail addresses (@gmail.com) are allowed.</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-lock"></i> Password</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" name="password" id="password" placeholder="Create a password" required
+                                   minlength="8" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$">
+                        </div>
+                        <span class="error-message">Password must be at least 8 characters with uppercase, lowercase, and number.</span>
+                        <div class="password-strength" id="passwordStrength"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-lock"></i> Confirm Password</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" name="confirm_password" id="confirm_password"
+                                   placeholder="Confirm your password" required>
+                        </div>
+                        <span class="error-message" id="passwordMatch">Passwords do not match.</span>
+                    </div>
+
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-user-plus"></i> Create Account
+                    </button>
+                </form>
+
+                <div class="auth-footer">
+                    Already have an account? <a href="{{ url_for('login') }}">Login here</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirm_password');
+    const passwordStrength = document.getElementById('passwordStrength');
+    const passwordMatch = document.getElementById('passwordMatch');
+
+    password.addEventListener('input', function() {
+        const value = this.value;
+        if (!value) {
+            passwordStrength.textContent = '';
+            return;
+        }
+
+        let strength = 0;
+        if (value.length >= 8) strength++;
+        if (/[a-z]/.test(value)) strength++;
+        if (/[A-Z]/.test(value)) strength++;
+        if (/\d/.test(value)) strength++;
+        if (/[^a-zA-Z\d]/.test(value)) strength++;
+
+        passwordStrength.textContent = '';
+        if (strength <= 2) {
+            passwordStrength.textContent = 'Weak password';
+        } else if (strength <= 4) {
+            passwordStrength.textContent = 'Medium password';
+        } else {
+            passwordStrength.textContent = 'Strong password';
+        }
+    });
+
+    confirmPassword.addEventListener('input', function() {
+        if (this.value !== password.value && this.value.length > 0) {
+            passwordMatch.style.display = 'block';
+        } else {
+            passwordMatch.style.display = 'none';
+        }
+    });
+
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        if (password.value !== confirmPassword.value) {
+            e.preventDefault();
+            passwordMatch.style.display = 'block';
+            confirmPassword.focus();
+        }
+    });
+</script>
+{% endblock %}

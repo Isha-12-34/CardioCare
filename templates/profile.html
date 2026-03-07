@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Profile | CardioCare{% endblock %}
+
+{% block extra_head %}
+<style>
+    .profile-card {
+        background: linear-gradient(135deg, #faf7f7, #fdebef);
+        border-radius: 18px;
+        padding: 22px 20px 26px;
+        box-shadow: 0 16px 40px rgba(247, 181, 197, 0.8);
+        border: 3px solid #744f4f;
+        max-width: 520px;
+    }
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+    .profile-avatar {
+        width: 54px;
+        height: 54px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #fb7185, #e11d48);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        font-weight: 600;
+        color: #f9fafb;
+    }
+    .profile-name {
+        font-size: 18px;
+        font-weight: 600;
+    }
+    .profile-email {
+        font-size: 13px;
+        color: #9ca3af;
+    }
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 14px 18px;
+        margin-top: 10px;
+    }
+    label {
+        font-size: 13px;
+        color: #020202;
+        margin-bottom: 4px;
+        display: block;
+    }
+    input, select {
+        width: 100%;
+        padding: 9px 10px;
+        border-radius: 10px;
+        border: 1px solid rgba(202, 221, 248, 0.5);
+        background: linear-gradient(135deg, #fb7185, #e11d48);
+        color: #050505;
+        font-size: 13px;
+    }
+    input:focus, select:focus {
+        outline: none;
+        border-color: #f97373;
+        box-shadow: 0 0 0 1px #f97373;
+    }
+    .btn-save {
+        margin-top: 16px;
+        padding: 10px 18px;
+        border-radius: 999px;
+        border: none;
+        background: linear-gradient(135deg, #fb7185, #e11d48);
+        color: white;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        cursor: pointer;
+        box-shadow: 0 12px 25px rgba(252, 185, 216, 0.5);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-title">Profile</div>
+<div class="page-subtitle">View and update your personal information.</div>
+
+<div class="profile-card">
+    <div class="profile-header">
+        <div class="profile-avatar">
+            {{ user.name[0]|upper if user and user.name }}
+        </div>
+        <div>
+            <div class="profile-name">{{ user.name }}</div>
+            <div class="profile-email">{{ user.email }}</div>
+        </div>
+    </div>
+
+    <form method="POST">
+        <div class="form-grid">
+            <div>
+                <label for="name">Full Name</label>
+                <input id="name" name="name" type="text" value="{{ user.name }}" required>
+            </div>
+            <div>
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" value="{{ user.email }}" readonly>
+            </div>
+            <div>
+                <label for="age">Age</label>
+                <input id="age" name="age" type="number" min="1" max="120"
+                       value="{{ user.age if user.age is not none }}">
+            </div>
+            <div>
+                <label for="gender">Gender</label>
+                <select id="gender" name="gender">
+                    <option value="">Select gender</option>
+                    <option value="Male" {% if user.gender == 'Male' %}selected{% endif %}>Male</option>
+                    <option value="Female" {% if user.gender == 'Female' %}selected{% endif %}>Female</option>
+                    <option value="Other" {% if user.gender == 'Other' %}selected{% endif %}>Other</option>
+                </select>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-save">
+            <i class="fas fa-save"></i> Save Changes
+        </button>
+    </form>
+</div>
+{% endblock %}
+

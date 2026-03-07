@@ -1,0 +1,331 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | CardioCare{% endblock %}
+
+{% block extra_head %}
+<style>
+    .grid {
+        display: grid;
+        gap: 18px;
+    }
+    .grid-4 {
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    }
+    .grid-2 {
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    }
+    .card {
+        background: linear-gradient(135deg, #fafafa, #fff5f7);
+        border-radius: 22px;
+        padding: 18px 18px 20px;
+        box-shadow: 0 18px 40px rgba(248, 113, 113, 0.25);
+        border: 3px solid #744f4f;
+    }
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+        font-size: 13px;
+        color: #9f1239;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        
+    }
+    .card-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fee2e2;
+        color: #e11d48;
+    }
+    .card-value {
+        font-size: 24px;
+        font-weight: 600;
+        margin-top: 4px;
+        color: #111827;
+    }
+    .card-sub {
+        font-size: 13px;
+        color: #58262d;
+        margin-top: 4px;
+    }
+
+    .trend-container {
+        padding: 18px 18px 22px;
+    }
+
+    .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 12px;
+        border-radius: 999px;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+    }
+    .pill-up { background: #fee2e2; color: #b91c1c; }
+    .pill-down { background: #dcfce7; color: #166534; }
+
+    .notif-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        font-size: 13px;
+        padding: 8px 0;
+        border-bottom: 1px dashed #522525;
+    }
+    .notif-icon {
+        width: 26px;
+        height: 26px;
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fee2e2;
+        color: #e11d48;
+        flex-shrink: 0;
+    }
+
+    .articles {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        margin-top: 10px;
+    }
+    .article-card {
+        border-radius: 18px;
+        overflow: hidden;
+        background: #ffffff;
+        border: 3px solid #744f4f;
+        box-shadow: 0 14px 32px rgba(248, 113, 113, 0.22);
+    }
+    .article-image {
+        height: 90px;
+        background-size: cover;
+        background-position: center;
+    }
+    .article-body {
+        padding: 10px 12px 14px;
+    }
+    .article-title {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 4px;
+         color: #331219;
+    }
+    .article-desc {
+        font-size: 12px;
+        color: #331219;
+        margin-bottom: 8px;
+    }
+    .article-link {
+        font-size: 12px;
+        color: #e11d48;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-title">Dashboard</div>
+<div class="page-subtitle">
+    Welcome back, {{ session.get('user_name', 'User') }}. Here is your heart health overview.
+</div>
+
+<div class="grid grid-4">
+    <div class="card">
+        <div class="card-header">
+            <span>Last Risk Level</span>
+            <div class="card-icon"><i class="fas fa-heart-pulse"></i></div>
+        </div>
+        <div class="card-value">
+            {{ last_risk_level or "No data" }}
+        </div>
+        <div class="card-sub">
+            From your most recent prediction.
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <span>Last Risk Score</span>
+            <div class="card-icon"><i class="fas fa-percent"></i></div>
+        </div>
+        <div class="card-value">
+            {% if last_risk_score is not none %}{{ last_risk_score }}%{% else %}—{% endif %}
+        </div>
+        <div class="card-sub">
+            Estimated probability of heart disease.
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <span>Total Predictions</span>
+            <div class="card-icon"><i class="fas fa-chart-line"></i></div>
+        </div>
+        <div class="card-value">
+            {{ total_predictions }}
+        </div>
+        <div class="card-sub">
+            All predictions made with your account.
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <span>Account</span>
+            <div class="card-icon"><i class="fas fa-user"></i></div>
+        </div>
+        <div class="card-value">
+            {{ session.get('user_name', 'User') }}
+        </div>
+        <div class="card-sub">
+            <a href="{{ url_for('profile') }}" style="color: #331219;">View or edit profile →</a>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-2" style="margin-top:24px;">
+    <div class="card trend-container">
+        <div class="card-header">
+            <span>Risk Trend</span>
+            <span style="font-size:11px;color: #331219;">Based on your prediction history</span>
+        </div>
+        <canvas id="riskTrendChart" height="160"></canvas>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <span>Latest vs Previous</span>
+            {% if comparison_change is not none %}
+                {% if comparison_change < 0 %}
+                    <span class="pill pill-down"><i class="fas fa-arrow-down"></i>Improved</span>
+                {% elif comparison_change > 0 %}
+                    <span class="pill pill-up"><i class="fas fa-arrow-up"></i>Worsened</span>
+                {% else %}
+                    <span class="pill" style="background:rgba(235, 240, 247, 0.2);color: #331219;;">
+                        <i class="fas fa-minus"></i>No change
+                    </span>
+                {% endif %}
+            {% endif %}
+        </div>
+
+        <div style="font-size:13px;margin-top:8px;">
+            <strong>Last prediction:</strong>
+            {% if last_risk_score is not none %}
+                {{ last_risk_score }}% ({{ last_risk_level }})
+            {% else %}
+                No prediction yet.
+            {% endif %}
+        </div>
+        <div style="font-size:13px;margin-top:4px;">
+            <strong>Previous prediction:</strong>
+            {% if previous_risk_score is not none %}
+                {{ previous_risk_score }}% ({{ previous_risk_level }})
+            {% else %}
+                Not enough history to compare.
+            {% endif %}
+        </div>
+
+        {% if comparison_change is not none and previous_risk_score is not none %}
+        <div style="font-size:13px;margin-top:10px;">
+            <strong>Change:</strong>
+            {% if comparison_change < 0 %}
+                Improved by {{ comparison_change|abs }}%
+            {% elif comparison_change > 0 %}
+                Increased by {{ comparison_change }}%
+            {% else %}
+                No change in risk score.
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <hr style="color: #331219;margin:14px 0;">
+
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px;">Notifications</div>
+        {% for note in notifications %}
+        <div class="notif-item">
+            <div class="notif-icon">
+                <i class="{{ note.icon }}"></i>
+            </div>
+            <div>
+                <div style="font-weight:500;">{{ note.title }}</div>
+                <div style="color: #331219;font-size:12px;">{{ note.message }}</div>
+            </div>
+        </div>
+        {% else %}
+        <div style="font-size:12px;color: #331219;">No notifications at this time.</div>
+        {% endfor %}
+    </div>
+</div>
+
+<div style="margin-top:26px;">
+    <div class="card">
+        <div class="card-header">
+            <span>Heart Health Articles</span>
+            <span style="font-size:11px;color: #331219;">Learn more about keeping your heart healthy</span>
+        </div>
+        <div class="articles">
+            {% for art in articles %}
+            <div class="article-card">
+                <div class="article-image" style="background-image:url('{{ art.image }}');"></div>
+                <div class="article-body">
+                    <div class="article-title">{{ art.title }}</div>
+                    <div class="article-desc">{{ art.description }}</div>
+                    <a href="{{ art.link }}" target="_blank" class="article-link">Read more →</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const labels = {{ history_labels|tojson }};
+    const scores = {{ history_scores|tojson }};
+
+    if (labels.length > 0) {
+        const ctx = document.getElementById('riskTrendChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Risk Score (%)',
+                    data: scores,
+                    borderColor: 'rgba(225, 29, 72, 1)',
+                    backgroundColor: 'rgba(248, 113, 113, 0.15)',
+                    tension: 0.35,
+                    fill: true,
+                    pointRadius: 3,
+                    pointBackgroundColor: '#fb7185'
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: { color: '#6b7280' },
+                        grid: { color: '#fee2e2' }
+                    },
+                    x: {
+                        ticks: { color: '#6b7280' },
+                        grid: { display: false }
+                    }
+                },
+                plugins: {
+                    legend: { labels: { color: '#6b7280' } }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}
+

@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}Result | CardioCare{% endblock %}
+
+{% block extra_head %}
+<style>
+    .result-layout {
+        max-width: 980px;
+        margin: 10px auto 0;
+        display: grid;
+        grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+        gap: 20px;
+    }
+    @media (max-width: 900px) {
+        .result-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+    .hero-card {
+        background: linear-gradient(135deg, #fafafa, #fff5f7);
+        border-radius: 22px;
+        padding: 24px 24px 26px;
+        box-shadow: 0 18px 50px rgba(248, 113, 113, 0.28);
+        border: 3px solid #744f4f;
+        position: relative;
+        overflow: hidden;
+    }
+    .hero-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(254, 226, 226, 0.9);
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.13em;
+        color: #9f1239;
+        margin-bottom: 10px;
+    }
+    .hero-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #881337;
+        margin-bottom: 4px;
+    }
+    .hero-subtitle {
+        font-size: 13px;
+        color: #030303;
+        margin-bottom: 18px;
+    }
+    .score-row {
+        display: flex;
+        align-items: baseline;
+        gap: 14px;
+        margin-top: 12px;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+    }
+    .score-value {
+        font-size: 32px;
+        font-weight: 800;
+    }
+    .score-label {
+        font-size: 12px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: #9f1239;
+        font-weight: 600;
+    }
+    .risk-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+    }
+    .risk-chip.low {
+        background: #dcfce7;
+        color: #166534;
+    }
+    .risk-chip.moderate {
+        background: #fef3c7;
+        color: #92400e;
+    }
+    .risk-chip.high {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .hero-note {
+        font-size: 12px;
+        color: #6b7280;
+        margin-top: 6px;
+    }
+    .side-card {
+        background: linear-gradient(135deg, #fafafa, #fff5f7);
+        border-radius: 22px;
+        padding: 18px 18px 20px;
+        box-shadow: 0 14px 40px rgba(248, 113, 113, 0.22);
+        border: 3px solid #744f4f;
+    }
+    .side-card h3 {
+        font-size: 16px;
+        margin: 0 0 10px;
+        color: #881337;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .side-card h3 i {
+        color: #e11d48;
+    }
+    .side-card ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        font-size: 13px;
+        color: #4b5563;
+    }
+    .side-card li {
+        padding: 6px 0 6px 20px;
+        position: relative;
+    }
+    .side-card li::before {
+        content: "•";
+        position: absolute;
+        left: 6px;
+        top: 2px;
+        color: #e11d48;
+    }
+    .buttons {
+        margin-top: 16px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .btn-pill {
+        padding: 9px 18px;
+        border-radius: 999px;
+        border: none;
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        text-decoration: none;
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, #fb7185, #e11d48);
+        color: #ffffff;
+        box-shadow: 0 10px 24px rgba(248, 113, 113, 0.4);
+    }
+    .btn-outline {
+        background: #fff1f2;
+        color: #9f1239;
+        border: 1px solid #fecaca;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-title">Prediction Result</div>
+<div class="page-subtitle">Here is your current heart disease risk based on the information you provided.</div>
+
+<div class="result-layout">
+    <section class="hero-card">
+        <div class="hero-pill">
+            <i class="fas fa-heart-pulse"></i>
+            CURRENT RISK SUMMARY
+        </div>
+        <h2 class="hero-title">Your heart disease risk today</h2>
+        <p class="hero-subtitle">Use this information to take the next best steps for your heart health.</p>
+
+        <div class="score-row">
+            <div>
+                <div class="score-label">RISK SCORE</div>
+                <div class="score-value">{{ risk_score }}%</div>
+            </div>
+            <div>
+                <div class="score-label">RISK LEVEL</div>
+                <div class="risk-chip
+                    {% if risk_level == 'Low' %}low{% elif risk_level == 'Moderate' %}moderate{% else %}high{% endif %}">
+                    <i class="fas fa-circle"></i>
+                    {{ risk_level }}
+                </div>
+            </div>
+        </div>
+
+        <p class="hero-note">
+            This score is an estimate based on your answers. It is not a diagnosis, but it can help you
+            understand whether you should focus on prevention, lifestyle changes, or medical follow-up.
+        </p>
+
+        <div class="buttons">
+            <a href="{{ url_for('predict') }}" class="btn-pill btn-primary">
+                <i class="fas fa-redo"></i> New Prediction
+            </a>
+            <a href="{{ url_for('history') }}" class="btn-pill btn-outline">
+                <i class="fas fa-history"></i> View History
+            </a>
+            <a href="{{ url_for('dashboard') }}" class="btn-pill btn-outline">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+        </div>
+    </section>
+
+    <section>
+        <div class="side-card" style="margin-bottom: 14px;">
+            <h3><i class="fas fa-user-md"></i> Personalized Recommendations</h3>
+            <ul>
+                {% for rec in recommendations %}
+                    <li>{{ rec }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="side-card">
+            <h3><i class="fas fa-heart"></i> Heart Health Tips</h3>
+            <ul>
+                {% for tip in health_tips %}
+                    <li>{{ tip }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}{% endblock %}

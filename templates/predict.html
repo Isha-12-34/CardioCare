@@ -1,0 +1,323 @@
+{% extends "base.html" %}
+
+{% block title %}Predict Risk | CardioCare{% endblock %}
+
+{% block extra_head %}
+<style>
+    .predict-card {
+        max-width: 840px;
+        margin: 20px auto 0;
+        background: #ffffff;
+        border-radius: 24px;
+        box-shadow: 0 18px 50px rgba(248, 113, 113, 0.25);
+        border: 3px solid #744f4f;
+        overflow: hidden;
+    }
+    .predict-header {
+        padding: 26px 26px 16px;
+        background: linear-gradient(135deg, #fb7185, #e11d48);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+    .predict-header-main h2 {
+        font-size: 20px;
+        margin: 0 0 4px;
+    }
+    .predict-header-main span {
+        font-size: 12px;
+        opacity: 0.9;
+    }
+    .predict-header-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 18px;
+        background: rgba(248, 250, 252, 0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+    }
+    .predict-body {
+        padding: 22px 24px 26px;
+    }
+    .info-box {
+        background: #fff1f2;
+        border-left: 4px solid #fb7185;
+        padding: 10px 12px;
+        border-radius: 10px;
+        font-size: 12px;
+        color: #6b7280;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+    .info-box i {
+        color: #e11d48;
+    }
+    .flash-message {
+        padding: 10px 12px;
+        border-radius: 10px;
+        margin-bottom: 8px;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #fee2e2;
+        color: #b91c1c;
+        border-left: 3px solid #e11d48;
+    }
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px 20px;
+        margin-top: 10px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 13px;
+        color: #374151;
+        font-weight: 500;
+    }
+    .input-wrapper {
+        position: relative;
+    }
+    .input-wrapper i {
+        position: absolute;
+        left: 11px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9ca3af;
+        font-size: 13px;
+    }
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 9px 11px 9px 32px;
+        border-radius: 10px;
+        border: 1px solid #fecaca;
+        font-size: 13px;
+        outline: none;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+        border-color: #fb7185;
+        box-shadow: 0 0 0 1px #fb7185;
+    }
+    .error-message {
+        color: #e11d48;
+        font-size: 11px;
+        margin-top: 4px;
+        display: none;
+    }
+    .btn-primary {
+        width: 100%;
+        margin-top: 16px;
+        padding: 11px 16px;
+        border-radius: 999px;
+        border: none;
+        background: linear-gradient(135deg, #fb7185, #e11d48);
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        box-shadow: 0 12px 28px rgba(248, 113, 113, 0.45);
+    }
+    .btn-primary:hover {
+        transform: translateY(-1px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-title">Predict Risk</div>
+<div class="page-subtitle">Enter your health information to get a personalized heart disease risk score.</div>
+
+<div class="predict-card">
+    <div class="predict-header">
+        <div class="predict-header-main">
+            <h2>Heart Disease Risk Prediction</h2>
+            <span>We use your lifestyle and health factors to estimate your current risk.</span>
+        </div>
+        <div class="predict-header-icon">
+            <i class="fas fa-stethoscope"></i>
+        </div>
+    </div>
+    <div class="predict-body">
+        <div class="info-box">
+            <i class="fas fa-info-circle"></i>
+            <span>Please provide accurate information for the best prediction results.</span>
+        </div>
+
+        <div class="flash-messages">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="flash-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <form method="POST" action="{{ url_for('predict') }}" id="predictForm">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label><i class="fas fa-birthday-cake"></i> Age</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-birthday-cake"></i>
+                        <input type="number" name="age" placeholder="Enter your age" required min="1" max="120">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-venus-mars"></i> Sex</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-venus-mars"></i>
+                        <select name="sex" required>
+                            <option value="">--Select--</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-heartbeat"></i> Heart Rate (bpm)</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-heartbeat"></i>
+                        <input type="number" name="heart_rate" placeholder="e.g. 72" required min="40" max="220">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-tint"></i> Blood Pressure</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-tint"></i>
+                        <select name="bp" required>
+                            <option value="">--Select--</option>
+                            <option value="Low">Low</option>
+                            <option value="Normal">Normal</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-lungs"></i> Chest Pain Type</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lungs"></i>
+                        <select name="chest_pain" required>
+                            <option value="">--Select--</option>
+                            <option value="Typical">Typical</option>
+                            <option value="Atypical">Atypical</option>
+                            <option value="Non-anginal">Non-anginal</option>
+                            <option value="Asymptomatic">Asymptomatic</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-smoking"></i> Smoking</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-smoking"></i>
+                        <select name="smoking" required>
+                            <option value="">--Select--</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-running"></i> Regular Exercise</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-running"></i>
+                        <select name="exercise" required>
+                            <option value="">--Select--</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-apple-alt"></i> Diet</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-apple-alt"></i>
+                        <select name="diet" required>
+                            <option value="">--Select--</option>
+                            <option value="Poor">Poor</option>
+                            <option value="Average">Average</option>
+                            <option value="Healthy">Healthy</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-brain"></i> Stress Level</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-brain"></i>
+                        <select name="stress" required>
+                            <option value="">--Select--</option>
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-dna"></i> Family History of Heart Disease</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-dna"></i>
+                        <select name="genetics" required>
+                            <option value="">--Select--</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-calculator"></i> Predict Risk
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.getElementById('predictForm').addEventListener('submit', function(e) {
+        const inputs = this.querySelectorAll('input[required], select[required]');
+        let isValid = true;
+
+        inputs.forEach(input => {
+            if (!input.value || input.value === '') {
+                isValid = false;
+                input.style.borderColor = '#fb7185';
+            } else {
+                input.style.borderColor = '#fecaca';
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+            alert('Please fill in all required fields.');
+        }
+    });
+</script>
+{% endblock %}
+
