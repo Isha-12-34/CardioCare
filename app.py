@@ -603,7 +603,7 @@ def history():
 @app.route('/logout')
 def logout():
     session.clear()
-    flash("Logged out successfully")
+    flash("Logged out successfully","success")
     return redirect(url_for('login'))
 
 
